@@ -5,10 +5,13 @@ public class pistol : MonoBehaviour
     public GameObject bullet;
     public Transform spawnPoint;
 
-    public float shotForce = 1800;
+    public float shotForce = 1000;
     public float shotRate = 0.2f;
 
     private float shotRateTime = 0;
+
+
+
 
 
     void Update()

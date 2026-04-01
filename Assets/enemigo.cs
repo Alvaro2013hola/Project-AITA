@@ -3,14 +3,15 @@ using UnityEngine.AI;
 
 public class enemigo : MonoBehaviour
 {
-  NavMeshAgent agent;
+
+    NavMeshAgent agent;
     public Transform player;
 
 
     private void Start()
     {
-       agent = GetComponent<NavMeshAgent>();
-        
+        agent = GetComponent<NavMeshAgent>();
+
 
     }
 
@@ -18,5 +19,19 @@ public class enemigo : MonoBehaviour
     private void Update()
     {
         agent.destination = player.position;
+
+
+        
+
     }
+        
+
+
+
+
+    
 }
+
+
+
+
