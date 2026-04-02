@@ -12,6 +12,11 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight = 1f;
     public float turnSmoothTime = 0.1f;
 
+    [Header("Health Settings")]
+    public int maxHealth = 10;
+    public int currentHealth;
+    public HealthBar healthBar;
+
     [Header("Input Actions")]
     public InputActionAsset inputActions;
     private InputAction moveAction;
@@ -28,6 +33,30 @@ public class PlayerMovement : MonoBehaviour
             var playerMap = inputActions.FindActionMap("Player");
             moveAction = playerMap.FindAction("Move");
             jumpAction = playerMap.FindAction("Jump");
+        }
+    }
+
+    void Start()
+    {
+        currentHealth = maxHealth;
+        if (healthBar != null)
+        {
+            healthBar.SetMaxHealth(maxHealth);
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHealth);
+        }
+
+        if (currentHealth <= 0)
+        {
+            // Opcional: Reiniciar posición o escena
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
     }
 

@@ -13,6 +13,7 @@ public class TutorialManager : MonoBehaviour
     public InputActionAsset inputActions;
     private InputAction moveAction;
     private InputAction jumpAction;
+    private InputAction shootAction;
 
     [Header("UI Settings")]
     public float typingSpeed = 0.05f;
@@ -28,6 +29,7 @@ public class TutorialManager : MonoBehaviour
             var playerMap = inputActions.FindActionMap("Player");
             moveAction = playerMap.FindAction("Move");
             jumpAction = playerMap.FindAction("Jump");
+            shootAction = playerMap.FindAction("Shoot");
         }
     }
 
@@ -35,12 +37,14 @@ public class TutorialManager : MonoBehaviour
     {
         moveAction?.Enable();
         jumpAction?.Enable();
+        shootAction?.Enable();
     }
 
     void OnDisable()
     {
         moveAction?.Disable();
         jumpAction?.Disable();
+        shootAction?.Disable();
     }
 
     void Start()
@@ -63,6 +67,13 @@ public class TutorialManager : MonoBehaviour
 
             case 1: // Jump
                 if (jumpAction != null && jumpAction.triggered)
+                {
+                    CompleteStep();
+                }
+                break;
+
+            case 2: // Shoot
+                if (shootAction != null && shootAction.triggered)
                 {
                     CompleteStep();
                 }
@@ -97,6 +108,9 @@ public class TutorialManager : MonoBehaviour
             case 1:
                 message = "Press Space or the south button to jump";
                 break;
+            case 2:
+                message = "Press Left Click or the right button to shoot";
+                break;
         }
 
         if (typingCoroutine != null) StopCoroutine(typingCoroutine);
@@ -117,7 +131,7 @@ public class TutorialManager : MonoBehaviour
     IEnumerator FinishTutorialRoutine()
     {
         if (typingCoroutine != null) StopCoroutine(typingCoroutine);
-        yield return StartCoroutine(TypeText("Tutorial completed!"));
+        yield return StartCoroutine(TypeText("Tutorial completed! Now you can play by your own count!"));
             
         yield return new WaitForSeconds(3f);
         
