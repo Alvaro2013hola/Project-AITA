@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
 
+    private CinemachineImpulseSource impulseSource;
+
     void Awake()
     {
         if (inputActions != null)
@@ -34,10 +37,14 @@ public class PlayerMovement : MonoBehaviour
             moveAction = playerMap.FindAction("Move");
             jumpAction = playerMap.FindAction("Jump");
         }
+
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+
         currentHealth = maxHealth;
         if (healthBar != null)
         {
@@ -48,9 +55,16 @@ public class PlayerMovement : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        Debug.Log("¡Jugador Dañado! Vida restante: " + currentHealth);
+
         if (healthBar != null)
         {
             healthBar.SetHealth(currentHealth);
+        }
+
+        if (impulseSource != null)
+        {
+            impulseSource.GenerateImpulse();
         }
 
         if (currentHealth <= 0)

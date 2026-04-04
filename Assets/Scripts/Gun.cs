@@ -1,80 +1,84 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 public class Gun : MonoBehaviour
 {
     public GameObject bullet;
     public Transform spawnPoint;
 
-    [Header("Settings")]
     public float shotForce = 1000;
     public float shotRate = 0.2f;
 
-    [Header("Input Actions")]
-    public InputActionAsset inputActions;
-    private InputAction shootAction;
-
     private float shotRateTime = 0;
 
-    void Awake()
+    public float range = 20f;
+    public float rotationSpeed = 10f;
+
+    private CinemachineImpulseSource impulseSource;
+
+    void Start()
     {
-        if (inputActions != null)
-        {
-            var playerMap = inputActions.FindActionMap("Player");
-            shootAction = playerMap.FindAction("Shoot");
-        }
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
-    void OnEnable()
-    {
-        shootAction?.Enable();
-    }
-
-    void OnDisable()
-    {
-        shootAction?.Disable();
-    }
+    private Transform target;
 
     void Update()
     {
-        RotateTowardsMouse();
+        FindClosestEnemy();
 
-        if (shootAction != null && shootAction.triggered)
+        if (target != null)
+        {
+            AimAtTarget();
+        }
+
+        if (Input.GetButton("Fire1") || Input.GetMouseButton(0))
         {
             if (Time.time > shotRateTime)
             {
                 Shoot();
-                shotRateTime = Time.time + shotRate;
             }
         }
     }
 
-    void RotateTowardsMouse()
+    void FindClosestEnemy()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, transform.position);
-        float rayDistance;
+        Enemy[] enemies = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        float closestDistance = Mathf.Infinity;
+        Transform closestEnemy = null;
 
-        if (groundPlane.Raycast(ray, out rayDistance))
+        foreach (Enemy enemy in enemies)
         {
-            Vector3 pointToLook = ray.GetPoint(rayDistance);
-            Debug.DrawLine(ray.origin, pointToLook, Color.cyan);
-
-            Vector3 lookDirection = (pointToLook - transform.position).normalized;
-            // Solo rotar en el eje Y (opcional, dependiendo de si quieres que apunte arriba/abajo)
-            lookDirection.y = 0; 
-            
-            if (lookDirection != Vector3.zero)
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < closestDistance && distance <= range)
             {
-                transform.rotation = Quaternion.LookRotation(lookDirection);
+                closestDistance = distance;
+                closestEnemy = enemy.transform;
             }
         }
+        target = closestEnemy;
+    }
+
+    void AimAtTarget()
+    {
+        // Aim at the center of the enemy's body (approx +1 meter up from pivot)
+        Vector3 targetPoint = target.position + Vector3.up;
+        Vector3 direction = targetPoint - transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
     void Shoot()
     {
         GameObject newBullet = Instantiate(bullet, spawnPoint.position, spawnPoint.rotation);
         newBullet.GetComponent<Rigidbody>().AddForce(spawnPoint.forward * shotForce);
+        shotRateTime = Time.time + shotRate;
         Destroy(newBullet, 2);
+
+        if (impulseSource != null)
+        {
+            impulseSource.GenerateImpulse();
+        }
     }
 }

@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour
 
     [Header("Attack Settings")]
     public int attackDamage = 1;
-    public float attackRange = 1.5f;
+    public float attackRange = 2.0f;
     public float attackRate = 1f;
     private float nextAttackTime;
 
@@ -19,7 +19,11 @@ public class Enemy : MonoBehaviour
     {
         if (player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
         }
         health = maxHealth;
         if (healthBar != null)
@@ -50,9 +54,11 @@ public class Enemy : MonoBehaviour
         PlayerMovement playerScript = player.GetComponent<PlayerMovement>();
         if (playerScript != null)
         {
+            Debug.Log("Enemigo Atacando Jugador!");
             playerScript.TakeDamage(attackDamage);
         }
     }
+
 
     public void TakeDamage(int damage)
     {
